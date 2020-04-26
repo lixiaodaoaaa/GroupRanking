@@ -1,0 +1,19 @@
+version '1.0-SNAPSHOT'
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.reactivex:rxjava:1.0.12'
+    compile 'io.reactivex.rxjava2:rxjava:2.0.0'
+
+    compile group: 'redis.clients', name: 'jedis', version: '3.2.0'
+}
+
+task run(type: JavaExec) {
+    main = 'net.danlew.sample.Sample'
+    classpath = sourceSets.main.runtimeClasspath
+}

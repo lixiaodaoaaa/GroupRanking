@@ -2,6 +2,7 @@
 > 群友排行榜功能介绍。
 排行榜是非常常用的功能设计，能够极大的提高群友活跃度数，增加群友活动乐趣，有些排行榜数据是依靠收集，数据之间无法打通，比如每个人的盈利数据（基金、赚钱）或者营销数据。那么本程序的排行榜功能依赖于Redis可以实现快速排行功能。
 
+如下是排行榜示意图
 <br>
 ![](https://raw.githubusercontent.com/lixiaodaoaaa/publicSharePic/master/nrankingExam.png)
 
@@ -11,6 +12,7 @@
  每天都需要统计群里每人的盈利金额，然后计算当日排行榜，和周排行榜，月度排行榜和总计排行榜。举例，当日营销数据，
  当日赚钱数据，当日股票盈利数据等，都可以用此程序1s钟计算钟计算出当日排行榜，累计排行榜和月度排行榜累计排行榜等。
 
+示意图展示如下：
 <br>
 ![](https://raw.githubusercontent.com/lixiaodaoaaa/publicSharePic/master/nrankingExam.png)
 

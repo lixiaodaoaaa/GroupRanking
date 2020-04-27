@@ -85,6 +85,13 @@ public class WeekDayUtils {
     }
 
 
+
+    public static boolean isTodayIsMonday(){
+        //作用防止周日得到本周日期
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY;
+    }
+
     /**
      * 获取上周一时间
      */
@@ -136,4 +143,8 @@ public class WeekDayUtils {
         return rankDateFormatter.format(cal.getTime());
     }
 
+
+    public static String getSomeDayTableName(String someDate){
+        return new StringBuilder().append(RANK_HEADER).append(someDate).toString();
+    }
 }

@@ -88,9 +88,12 @@ public class RedisEngnie {
 
     public boolean isTodayDataIsYesterdayData(HashMap<String,Integer> userDataMap) {
 
-        String yesterdayTableName = WeekDayUtils.getYesterdayRankTableName();
+        String lastTradeDateTableName = WeekDayUtils.getYesterdayRankTableName();
+        if(WeekDayUtils.isTodayIsMonday()){
 
-        if (!jedis.exists(yesterdayTableName)) {
+            lastTradeDateTableName =   WeekDayUtils.getLastFridayTableName();
+        }
+        if (!jedis.exists(lastTradeDateTableName)) {
             return true;
         }
 
@@ -101,7 +104,7 @@ public class RedisEngnie {
         for (String fileUserRank : fileLoadUsers) {
             int fileUserScore = userDataMap.get(fileUserRank);
 
-            Double dbUserScoreDoubule = jedis.zscore(WeekDayUtils.getYesterdayRankTableName(), fileUserRank);
+            Double dbUserScoreDoubule = jedis.zscore(lastTradeDateTableName, fileUserRank);
             int userRankScoreDb = new Long(Math.round(dbUserScoreDoubule)).intValue();
             if (fileUserScore == userRankScoreDb) {
                 sameCount++;

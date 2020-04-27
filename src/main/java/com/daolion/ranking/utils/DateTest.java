@@ -18,7 +18,11 @@ public class DateTest {
     public void testDate() {
 
         RedisEngnie engnie = RedisEngnie.getInstance();
-        engnie.countLastWeekRanking();
 
+
+
+
+        boolean result = WeekDayUtils.isTodayIsMonday();
+        System.out.println(" result is "+result);
     }
 }

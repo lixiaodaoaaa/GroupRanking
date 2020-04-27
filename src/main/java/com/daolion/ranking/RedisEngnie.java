@@ -7,11 +7,10 @@ package com.daolion.ranking;
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  */
 
-import com.daolion.ranking.utils.DateFormatterUtils;
+import com.daolion.ranking.utils.WeekDayUtils;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import redis.clients.jedis.Jedis;
@@ -41,21 +40,6 @@ public class RedisEngnie {
         return instance;
     }
 
-    public String getTodayRankTableName() {
-        String rankHeader = "rank_";
-        String todayDate = DateFormatterUtils.formatterDateToRankDate(new Date());
-        return new StringBuilder().append(rankHeader).append(todayDate).toString();
-    }
-
-
-    public String getYesterdayRankTableName() {
-        String rankHeader = "rank_";
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, -24);
-        String yesterdayDate = DateFormatterUtils.formatterDateToRankDate(calendar.getTime());
-        return new StringBuilder().append(rankHeader).append(yesterdayDate).toString();
-    }
-
 
     public void setAllRankUserScore(String rankerUser, double score) {
         jedis.zadd(KEY_ALL_RANKING, score, rankerUser);
@@ -63,7 +47,7 @@ public class RedisEngnie {
 
 
     public void addTodayScore(String rankerUser, int score) {
-        String todayTableName = getTodayRankTableName();
+        String todayTableName = WeekDayUtils.getTodayRankTableName();
         jedis.zadd(todayTableName, score, rankerUser);
     }
 
@@ -104,7 +88,7 @@ public class RedisEngnie {
 
     public boolean isTodayDataIsYesterdayData(HashMap<String,Integer> userDataMap) {
 
-        String yesterdayTableName = getYesterdayRankTableName();
+        String yesterdayTableName = WeekDayUtils.getYesterdayRankTableName();
 
         if (!jedis.exists(yesterdayTableName)) {
             return true;
@@ -117,7 +101,7 @@ public class RedisEngnie {
         for (String fileUserRank : fileLoadUsers) {
             int fileUserScore = userDataMap.get(fileUserRank);
 
-            Double dbUserScoreDoubule = jedis.zscore(getYesterdayRankTableName(), fileUserRank);
+            Double dbUserScoreDoubule = jedis.zscore(WeekDayUtils.getYesterdayRankTableName(), fileUserRank);
             int userRankScoreDb = new Long(Math.round(dbUserScoreDoubule)).intValue();
             if (fileUserScore == userRankScoreDb) {
                 sameCount++;
@@ -184,17 +168,17 @@ public class RedisEngnie {
     //查看当日排行榜
     public void lookToadyRanking() {
 
-        System.out.println("✨✨✨✨✨✨" + getTodayRankTableName() + "排行榜✨✨✨✨✨✨");
+        System.out.println("✨✨✨✨✨✨" + WeekDayUtils.getTodayRankTableName() + "排行榜✨✨✨✨✨✨");
 
         if (jedis == null) {
             jedis = new Jedis("127.0.0.1", 6379);
         }
 
-        Set<String> rankUserSets = jedis.zrevrange(getTodayRankTableName(), 0l, -1l);
+        Set<String> rankUserSets = jedis.zrevrange(WeekDayUtils.getTodayRankTableName(), 0l, -1l);
         int count = 0;
         for (String rankUser : rankUserSets) {
             count++;
-            Double userScore = jedis.zscore(getTodayRankTableName(), rankUser);
+            Double userScore = jedis.zscore(WeekDayUtils.getTodayRankTableName(), rankUser);
             int userRankScore = new Long(Math.round(userScore)).intValue();
 
             if (userRankScore < 0) {
@@ -285,7 +269,7 @@ public class RedisEngnie {
     }
 
     public String getKeyTodayIsAdded() {
-        return getTodayRankTableName() + IS_ADDED_TO_ALL_RANKING_FLAG;
+        return WeekDayUtils.getTodayRankTableName() + IS_ADDED_TO_ALL_RANKING_FLAG;
     }
 
 
@@ -345,13 +329,57 @@ public class RedisEngnie {
         }
     }
 
-    public void peridRank() {
+    public void countLastWeekRanking() {
+        String lastWeekTableName = WeekDayUtils.getLastWeekTableName();
+        List<String> lastWeekDayTableNames = WeekDayUtils.getLastWeekDayTableNames();
+        for (String everyDataTableName : lastWeekDayTableNames) {
+            Set<String> rankUserSets = jedis.zrevrange(everyDataTableName, 0l, -1l);
+            for (String rankUser : rankUserSets) {
+                Double userScore = jedis.zscore(everyDataTableName, rankUser);
+                int userRankScore = new Long(Math.round(userScore)).intValue();
+                jedis.zincrby(lastWeekTableName, userRankScore, rankUser);
+            }
+        }
+        lookSomeTableRanking(lastWeekTableName);
+    }
 
-        //redis-cli  ZUNIONSTORE
+    public void lookSomeTableRanking(String tableName) {
+        if (jedis == null) {
+            jedis = new Jedis("127.0.0.1", 6379);
+        }
+        Set<String> rankUserSets = jedis.zrevrange(tableName, 0l, -1l);
 
-        String todayRankTableName = getTodayRankTableName();
+        int count = 0;
 
-        jedis.zunionstore("", "", "");
+        System.out.printf("✨✨✨✨✨✨✨✨✨%s✨✨✨✨✨✨✨✨✨✨", tableName);
+        System.out.println("\n");
+
+        for (String rankUser : rankUserSets) {
+            count++;
+
+            Double userScore = jedis.zscore(tableName, rankUser);
+            int userRankScore = new Long(Math.round(userScore)).intValue();
+
+            if (userRankScore < 0) {
+                System.out.print(Color.BLUE);
+
+                System.out.printf("%-1d  \t %-8s \t %d", count, rankUser, userRankScore);
+                System.out.println();
+                System.out.println("-------------------------------------------");
+
+                System.out.print(Color.RESET);
+
+            } else {
+                System.out.print(Color.RED_BOLD_BRIGHT);
+
+                System.out.printf("%-1d  \t %-8s \t %d", count, rankUser, userRankScore);
+                System.out.println();
+                System.out.println("-------------------------------------------");
+
+                System.out.print(Color.RESET);
+
+            }
+        }
 
     }
 

@@ -1,29 +1,24 @@
-package com.daolion.ranking;
+package com.daolion.ranking.utils;
 /*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ 
        Author   :  lixiaodaoaaa
-       Date     :  2020/4/21
-       Time     :  09:22
+       Date     :  2020/4/27
+       Time     :  10:26
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  */
 
+import com.daolion.ranking.RedisEngnie;
 
 import org.junit.Test;
 
-public class TestEngnieer {
+public class DateTest {
+
 
     @Test
     public void testDate() {
 
-
         RedisEngnie engnie = RedisEngnie.getInstance();
-
-
-        engnie.addSomeDayScore(engnie.getYesterdayRankTableName(), RankUserLoader.XL, 5767);
-
-        engnie.lookSomeDayRanking(engnie.getYesterdayRankTableName());
-
-
+        engnie.countLastWeekRanking();
 
     }
 }

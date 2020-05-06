@@ -20,9 +20,7 @@ public class DateTest {
         RedisEngnie engnie = RedisEngnie.getInstance();
 
 
+        engnie.setTodayIsNotAddToAllRanking();
 
-
-        boolean result = WeekDayUtils.isTodayIsMonday();
-        System.out.println(" result is "+result);
     }
 }
